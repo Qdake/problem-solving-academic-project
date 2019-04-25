@@ -48,7 +48,7 @@ def simple_presentation(photos,photosH,photosV):
     return presentation
 
 def write(presentation):
-    f = open('/home/wei/Documents/rp-qiu/mywork/writeTryq.txt','w')
+    f = open('resultat.txt','w')
     f.writelines([str(len(presentation)),'\n'])
     for photo in presentation:
         if len(photo) == 1:
@@ -230,33 +230,6 @@ def choisirPhotoMaximisantTransitionAlea(photos_num,slide,slideACompleter,patien
         slideACompleter.remove(num)
     return photoChoisie_num;
 
-pathIn_4 = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/a_example.txt';
-pathIn_1000_47K = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/c_memorable_moments.txt';
-pathIn_90000_4M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/d_pet_pictures.txt';
-pathIn_80000_6M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/e_shiny_selfies.txt';
-pathIn_80000_9M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/b_lovely_landscapes.txt';
-p = 1
-#photos, photosH, photosV = read("b_lovely_landscapes.txt",p)
-#photos, photosH, photosV = read(pathIn_1000_47K,p);
-photos, photosH, photosV = read(pathIn_90000_4M,p);
-photos_num = [photo.num for photo in photos];
-photosV_num = [photo.num for photo in photosV];
-photosH_num = [photo.num for photo in photosH];
-
-presentation = simple_presentation(photos,photosH,photosV)
-print(evaluate(presentation))
-#write(presentation)
-#p1 = gloutonSimple(photos_num,photosV_num,photosH_num,60)
-#print("glouton simple evalue(p1) = ",evaluate(p1))   
-patience = 10;
-duration = 60;#secondes
-photos_num = [photo.num for photo in photos];
-photosV_num = [photo.num for photo in photosV];
-photosH_num = [photo.num for photo in photosH];
-s = time.time();
-p2 = gloutonAlea(photos_num,photosV_num,photosH_num,patience)
-print("glouton alea alea = {} evalue(p2) = {}, temp = {}".format(patience,evaluate(p2),time.time()-s));   
-
 ######################  exercice 4 #######################################
 def transposition(l,i,j):
     l2 = l.copy();
@@ -314,12 +287,40 @@ def recherche_locale_descente_stochastique(presentation,patience,duration):
         print("temps depasse")
     return presentation;
 
+pathIn_4 = './../data/a_example.txt';
+pathIn_1000_47K = './../data/c_memorable_moments.txt';
+pathIn_90000_4M = './../data/d_pet_pictures.txt';
+pathIn_80000_6M = './../data/e_shiny_selfies.txt';
+pathIn_80000_9M = './../data/b_lovely_landscapes.txt';
+p = 1
+#photos, photosH, photosV = read("b_lovely_landscapes.txt",p)
+photos, photosH, photosV = read(pathIn_1000_47K,p);
+#photos, photosH, photosV = read(pathIn_80000_9M,p);
+photos_num = [photo.num for photo in photos];
+photosV_num = [photo.num for photo in photosV];
+photosH_num = [photo.num for photo in photosH];
+
+p1 = simple_presentation(photos,photosH,photosV)
+write(p1);
+print(evaluate(p1))
+write(presentation)
+p1 = gloutonSimple(photos_num,photosV_num,photosH_num,60)
+print("glouton simple evalue(p1) = ",evaluate(p1))   
+patience = 10;
+duration = 60;#secondes
+photos_num = [photo.num for photo in photos];
+photosV_num = [photo.num for photo in photosV];
+photosH_num = [photo.num for photo in photosH];
+s = time.time();
+p2 = gloutonAlea(photos_num,photosV_num,photosH_num,patience)
+print("glouton alea alea = {} evalue(p2) = {}, temp = {}".format(patience,evaluate(p2),time.time()-s));   
+
 patience = 100
 temps = 60
 s = time.time();
 p3 = recherche_locale_descente_stochastique(p1,patience,temps);
 print("glouton stochastique(patience = {},dureeMaximum = {}), evalue(p3) = {}, temps ={} ".format(patience,temps,evaluate(p3),time.time()-s));   
 
-=======
+#=======
 print("glouton alea alea = {} evalue(p2) = {} ".format(patience,evaluate(p2)));   
->>>>>>> 18caea4b98db8d3ab369a03faa11f0b4041f864f
+

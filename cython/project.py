@@ -8,12 +8,6 @@ import random
 #from fonctions import simple_presentation_cy 
 import fonctions
 
-
-class Photo:
-    def __init__(self,orientation,mots,num):
-        self.orientation = orientation;
-        self.mots = mots; 
-        self.num = num;
 def read(f,p):
     '''input: f le chemin de ficher entree (chaine de caracteres)
               p pourcentage de lignes
@@ -21,36 +15,23 @@ def read(f,p):
                photosV l'ensemble des photos verticaux (liste d'objects)
                photosH l'ensemble des photos horizontaux (liste d'ojects)
     '''
-    file = open(f,'r')
-    n = int(file.readline());
     photos = []
-    photosV = []
-    photosH = []
-    for i in range(int(np.floor(n*p))):
-        line = file.readline()
-        line = line.replace("\n", "")
-        line = line.split(' ')
-        photo = Photo(line[0],set(line[2:]),i);
-        photos.append(photo)
-        if photo.orientation == 'H':
-            photosH.append(photo)
-        if photo.orientation == 'V':
-            photosV.append(photo)
-            
-    file.close()
-    return photos, photosH, photosV
-
-def write(presentation):
-    f = open('/home/wei/Documents/rp-qiu/mywork/writeTryq.txt','w')
-    f.writelines([str(len(presentation)),'\n'])
-    for photo in presentation:
-        if len(photo) == 1:
-            f.writelines([str(photo[0]),'\n'])
-        if len(photo) == 2:
-            f.writelines([str(photo[0]),' ',str(photo[1]),'\n'])
-    f.close()
-    return
-
+    photosV_num = []
+    photosH_num = []
+    with open(f,'r') as file:
+        n = int(file.readline())
+        for i in range(int(n*p)):
+            line = file.readline()
+            line = line.replace("\n", "")
+            line = line.split(' ')
+            photo = fonctions.Photo(line[0],set(line[2:]),i);
+            photos.append(photo)
+            if line[0] == 'H':
+                photosH_num.append(i)
+            else:
+                photosV_num.append(i)
+    return n,photos, photosH_num, photosV_num
+####################################laisser ici pour comparer############
 def simple_presentation(photosH_num,photosV_num):
     presentation = []
     for num in photosH_num:
@@ -58,9 +39,8 @@ def simple_presentation(photosH_num,photosV_num):
     for i in range(len(photosV_num)//2):
         presentation.append([photosV_num[2*i],photosV_num[2*i+1]])
     return presentation
-
-
-
+############################################################
+    
 
 def score_trans(slide1,slide2,photos):
     '''
@@ -121,7 +101,7 @@ def choisirPhotoMaximisantTransition(photos_num,slide,slideACompleter):
     photoChoisie_num = None;
     for num in photos_num: 
         slideACompleter.append(num);
-        score = score_trans(slide,slideACompleter);
+        score = score_trans(slide,slideACompleter,photos);
         if  score > scoreMaximum:
             photoChoisie_num = num;
             scoreMaximum = score;
@@ -129,7 +109,6 @@ def choisirPhotoMaximisantTransition(photos_num,slide,slideACompleter):
     return photoChoisie_num;
                     
 
-############### Exercice 3  methode gloutonne ##############
 def gloutonSimple(photos_num,photosV_num,photosH_num,T=60):
     # 1) initialization
     startTime = time.time();      # temps du debut de l'execution
@@ -152,10 +131,9 @@ def gloutonSimple(photos_num,photosV_num,photosH_num,T=60):
 #        presentation.afficher();
         for num in slide:
             photos_num.remove(num);
-            if photos[num].orientation == "V":
-                assert num in photosV_num, "photo {} is not in photosV_num".format(num)
+            if photos[num].orientation == "V"and num in photosV_num:
                 photosV_num.remove(num);
-            else:
+            elif num in photosH_num:
                 photosH_num.remove(num);
 #        print("photos used: ",photosUsed);
         slide = slideMaximisantTransition(photos_num,photosV_num.copy(),presentation[-1]);     # trouver la prochaine vignette qui maximisant la transition
@@ -231,56 +209,11 @@ def choisirPhotoMaximisantTransitionAlea(photos_num,slide,slideACompleter,patien
         slideACompleter.remove(num)
     return photoChoisie_num;
 
-pathIn_4 = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/a_example.txt';
-pathIn_1000_47K = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/c_memorable_moments.txt';
-pathIn_90000_4M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/d_pet_pictures.txt';
-pathIn_80000_6M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/e_shiny_selfies.txt';
-pathIn_80000_9M = '/home/wei/Documents/rp-qiu/qualification_round_2019.in/qualification_round_2019.in/b_lovely_landscapes.txt';
-p = 1
-#photos, photosH, photosV = read("b_lovely_landscapes.txt",p)
-#photos, photosH, photosV = read(pathIn_1000_47K,p);
-photos, photosH, photosV = read(pathIn_90000_4M,p);
-photos_num = [photo.num for photo in photos];
-photosV_num = [photo.num for photo in photosV];
-photosH_num = [photo.num for photo in photosH];
-
-start = time.time();
-presentation = simple_presentation(photosH_num,photosV_num)
-t1 = time.time()-start;
-presentation = fonctions.simple_presentation_cy(photosH_num,photosV_num)
-t2 = time.time()-t1;
-print("pour simple_presentation {} fois plus vite".format(t1/t2));
-
-print(evaluate(presentation,photos))
-write(presentation)
-#p1 = gloutonSimple(photos_num,photosV_num,photosH_num,60)
-#print("glouton simple evalue(p1) = ",evaluate(p1))   
-patience = 10;
-duration = 60;#secondes
-photos_num = [photo.num for photo in photos];
-photosV_num = [photo.num for photo in photosV];
-photosH_num = [photo.num for photo in photosH];
-
-s = time.time();
-start = time.time();
-p2 = gloutonAlea(photos_num,photosV_num,photosH_num,patience,photos)
-t1 = time.time()-start;
-
-photos_num = [photo.num for photo in photos];
-photosV_num = [photo.num for photo in photosV];
-photosH_num = [photo.num for photo in photosH];
-start = time.time();
-p2 = fonctions.gloutonAlea_cy(photos_num,photosV_num,photosH_num,patience,photos)
-t2 = time.time()-start;
-print("pour gloutonAlea {} fois plus vite".format(t1/t2));
-print("glouton alea alea = {} evalue(p2) = {}, temp = {}".format(patience,evaluate(p2,photos),time.time()-s));   
-
 ######################  exercice 4 #######################################
 def transposition(l,i,j):
-    l2 = l.copy();
-    l2[i] = l[j];
-    l2[j] = l[i];
-    return l2;
+    x = l[i];
+    l[i] = l[j];
+    l[j] = x;
 #def voisinage_Permuter_deux_vignettes_non_voisins(presentation):
 #    voisinage = [];
 #    for i in range(len(presentation)):
@@ -290,8 +223,8 @@ def transposition(l,i,j):
 def Permuter_deux_vignettes(presentation):
     i = np.random.choice(range(len(presentation)-2));
     j = np.random.choice(range(i+2,len(presentation)));
-    presentation2 = transposition(presentation,i,j);
-    return presentation2;
+    transposition(presentation,i,j);
+    return presentation
 def changer_une_photo(slide1,slide2):
     assert len(slide1)==2
     assert len(slide2)==2
@@ -308,7 +241,7 @@ def Permuter_une_des_deux_photos_V_entre_deux_vignettes(presentation):
     presentation2[i] = slide1;
     presentation2[j] = slide2;
     return presentation2
-def recherche_locale_descente_stochastique(presentation,patience,duration):
+def recherche_locale_descente_stochastique(presentation,patience,duration,photos):
     '''input:  duration->temps maximum d'execution de la recherche
                patience->nb maximum de recheches consecutives sans amelioration tolerees
        output: la meilleur presentations trouvee
@@ -321,7 +254,7 @@ def recherche_locale_descente_stochastique(presentation,patience,duration):
         presentation2 = voisin(presentation);
         score2 = evaluate(presentation2,photos);
         if score2 > score:
-            socre = score2;
+            score = score2;
             presentation = presentation2;
             k = 0;
         else:
@@ -332,9 +265,80 @@ def recherche_locale_descente_stochastique(presentation,patience,duration):
         print("temps depasse")
     return presentation;
 
+
+
+
+
+
+
+
+#============================== Main ====================================
+
+'''simple_presentation verifiee avec Checker. correct 100%
+'''    
+pathIn_4 = './../data/a_example.txt';
+pathIn_80000_9M = './../data/b_lovely_landscapes.txt';
+pathIn_1000_47K = './../data/c_memorable_moments.txt';
+pathIn_90000_4M = './../data/d_pet_pictures.txt';
+pathIn_80000_6M = './../data/e_shiny_selfies.txt';
+p = 1
+##photos, photosH, photosV = read(pathIn_4,p);
+#n,photos, photosH_num, photosV_num = fonctions.read(pathIn_80000_9M,p)
+#n,photos, photosH_num, photosV_num = read(pathIn_80000_9M,p)
+n,photos, photosH_num, photosV_num = read(pathIn_1000_47K,p);
+#photos, photosH, photosV = read(pathIn_90000_4M,p);
+#photos, photosH, photosV = read(pathIn_80000_6M,p);
+
+photos_num = list(range(n));
+
+################ pour tester presentation simple et cython, corredct #############
+#start = time.time();
+#presentation = simple_presentation(photosH_num.copy(),photosV_num.copy())
+#t1 = time.time()-start;
+#presentation = fonctions.simple_presentation_cy(photosH_num.copy(),photosV_num.copy())
+#t2 = time.time()-t1;
+#print("pour simple_presentation {} fois plus vite".format(t1/t2));
+#print(evaluate(presentation,photos))
+#write(presentation)
+#####################################################################
+
+   
+################# pour tester gloutonSimple et  cython ,      correct ###############33#
+#n1,photos1, photosH_num1, photosV_num1 = fonctions.read(pathIn_1000_47K,1)
+#photos_num1 = list(range(n1));
+#start = time.time();
+#p1 = gloutonSimple(photos_num1.copy(),photosV_num1.copy(),photosH_num1.copy(),60)
+#t1 = time.time()-start;
+#p1 = gloutonSimple(photos_num1.copy(),photosV_num1.copy(),photosH_num1.copy(),60)
+#t2 = time.time()-t1;
+#print("pour gloutonSimple {} fois plus vite".format(t1/t2));
+#print("glouton simple evalue(p1) = ",evaluate(p1,photos))
+#############################################################
+
+
+
+############################  pour tester glouton alea,      correct ###########
+#patience = 10;
+#duration = 60;#secondes
+#
+#start = time.time();
+#p2 = gloutonAlea(photos_num.copy(),photosV_num.copy(),photosH_num.copy(),patience,photos)
+#print("glouton alea alea = {} evalue(p2) = {}".format(patience,evaluate(p2,photos)));   
+#t1 = time.time()-start;
+#p2 = fonctions.gloutonAlea_cy(photos_num.copy(),photosV_num.copy(),photosH_num.copy(),patience,photos)
+#t2 = time.time()-t1;
+#print("pour gloutonAlea {} fois plus vite".format(t1/t2));
+#print("glouton alea alea = {} evalue(p2) = {}".format(patience,evaluate(p2,photos)));   
+###################################################
+
 patience = 10
 temps = 60
-s = time.time();
-p3 = recherche_locale_descente_stochastique(p2,patience,temps);
-print("glouton stochastique(patience = {},dureeMaximum = {}), evalue(p3) = {}, temps ={} ".format(patience,temps,evaluate(p3,photos),time.time()-s));   
+p2 = gloutonAlea(photos_num.copy(),photosV_num.copy(),photosH_num.copy(),patience,photos)
+start = time.time();
+p3 = recherche_locale_descente_stochastique(p2,patience,temps,photos);
+t1 = time.time() - start
+p3 = fonctions.recherche_locale_descente_stochastique_cy(p2,patience,temps,photos);
+t2 = time.time() - t1;
+print("pour recherche_locale_descente_stochastique {} fois plus vite".format(t1/t2));
+print("glouton stochastique(patience = {},dureeMaximum = {}), evalue(p3) = {}".format(patience,temps,evaluate(p3,photos)));   
 
